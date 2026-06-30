@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>City Shatter Animation</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: #111;
+      font-family: system-ui, sans-serif;
+      color: white;
+      overflow: hidden;
+    }
+
+    .scene-wrap {
+      width: min(92vw, 1100px);
+      aspect-ratio: 16 / 9;
+      position: relative;
+      border: 10px solid #777;
+      background: #aaa;
+      overflow: hidden;
+      cursor: pointer;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+    }
+
+    svg,
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    canvas {
+      pointer-events: none;
+    }
+
+    .hint {
+      position: absolute;
+      left: 18px;
+      bottom: 16px;
+      z-index: 3;
+      padding: 8px 12px;
+      font-size: 14px;
+      letter-spacing: 0.04em;
+      background: rgba(0, 0, 0, 0.45);
+      color: #eee;
+      backdrop-filter: blur(4px);
+      transition: opacity 0.4s ease;
+    }
+
+    .scene-wrap.playing .hint {
+      opacity: 0;
+    }
+
+    .reset {
+      position: fixed;
+      right: 22px;
+      bottom: 22px;
+      border: 1px solid #777;
+      background: #222;
+      color: white;
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .reset:hover {
+      background: #333;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="scene-wrap" id="sceneWrap">
+    <svg id="citySVG" viewBox="0 0 1600 900" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#d8d8d8"/>
+          <stop offset="45%" stop-color="#9a9a9a"/>
+          <stop offset="100%" stop-color="#5d5d5d"/>
+        </linearGradient>
+
+        <linearGradient id="streetGlow" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#7c7c7c"/>
+          <stop offset="100%" stop-color="#171717"/>
+        </linearGradient>
+      </defs>
+
+      <!-- sky -->
+      <rect width="1600" height="900" fill="url(#sky)" />
+
+      <!-- sharp clouds -->
+      <path d="M0 135 C240 65 355 95 520 55 C720 5 850 55 980 35 C1160 7 1300 75 1600 25 L1600 0 L0 0 Z"
+            fill="#eeeeee" opacity="0.65"/>
+      <path d="M0 190 C210 130 410 170 615 115 C800 67 970 122 1175 82 C1350 48 1470 95 1600 70 L1600 0 L0 0 Z"
+            fill="#cfcfcf" opacity="0.75"/>
+
+      <!-- distant city silhouettes -->
+      <g fill="#505050">
+        <rect x="80" y="310" width="70" height="290"/>
+        <rect x="170" y="260" width="95" height="340"/>
+        <rect x="290" y="345" width="70" height="255"/>
+        <rect x="390" y="210" width="130" height="390"/>
+        <rect x="560" y="285" width="90" height="315"/>
+        <rect x="690" y="235" width="120" height="365"/>
+        <rect x="850" y="330" width="90" height="270"/>
+        <rect x="970" y="180" width="145" height="420"/>
+        <rect x="1140" y="300" width="95" height="300"/>
+        <rect x="1260" y="250" width="120" height="350"/>
+        <rect x="1410" y="340" width="75" height="260"/>
+      </g>
+
+      <!-- background towers -->
+      <g fill="#292929">
+        <path d="M70 600 L95 220 L150 600 Z"/>
+        <path d="M210 600 L230 130 L280 600 Z"/>
+        <path d="M410 600 L455 90 L535 600 Z"/>
+        <path d="M760 600 L800 170 L860 600 Z"/>
+        <path d="M1010 600 L1055 100 L1130 600 Z"/>
+        <path d="M1320 600 L1375 150 L1440 600 Z"/>
+      </g>
+
+      <!-- main skyscrapers -->
+      <g fill="#0e0e0e">
+        <path d="M110 610 L150 210 L280 180 L315 610 Z"/>
+        <path d="M330 610 L365 310 L470 280 L520 610 Z"/>
+        <path d="M545 610 L590 105 L720 75 L785 610 Z"/>
+        <path d="M815 610 L850 245 L955 210 L1010 610 Z"/>
+        <path d="M1060 610 L1110 130 L1230 105 L1290 610 Z"/>
+        <path d="M1340 610 L1390 280 L1515 240 L1560 610 Z"/>
+      </g>
+
+      <!-- tower highlights -->
+      <g fill="#bdbdbd" opacity="0.36">
+        <path d="M175 235 L260 220 L268 600 L205 600 Z"/>
+        <path d="M615 125 L700 105 L715 600 L660 600 Z"/>
+        <path d="M1135 150 L1210 135 L1220 600 L1168 600 Z"/>
+      </g>
+
+      <!-- black foreground overpasses -->
+      <path d="M0 650 C230 570 440 680 660 605 C860 535 1040 620 1230 565 C1410 515 1510 590 1600 545 L1600 900 L0 900 Z"
+            fill="#181818"/>
+      <path d="M0 720 C260 650 470 760 720 680 C900 620 1115 700 1320 650 C1460 615 1540 660 1600 635 L1600 900 L0 900 Z"
+            fill="#070707"/>
+
+      <!-- streets -->
+      <path d="M0 740 C360 670 760 710 1600 620 L1600 700 C850 760 390 780 0 850 Z"
+            fill="url(#streetGlow)" opacity="0.95"/>
+      <path d="M0 805 C330 760 780 780 1600 705 L1600 750 C830 830 410 855 0 890 Z"
+            fill="#2e2e2e"/>
+
+      <!-- perspective light strips -->
+      <g stroke="#c9c9c9" stroke-width="10" opacity="0.65">
+        <path d="M80 815 C420 760 900 755 1510 680"/>
+        <path d="M310 865 C610 815 1050 800 1600 735"/>
+      </g>
+
+      <g stroke="#050505" stroke-width="18" opacity="0.95">
+        <path d="M0 690 C400 620 860 650 1600 560"/>
+        <path d="M0 765 C390 715 905 720 1600 650"/>
+      </g>
+
+      <!-- foreground blocks -->
+      <g fill="#101010">
+        <path d="M70 900 L145 735 L260 900 Z"/>
+        <path d="M340 900 L410 760 L560 900 Z"/>
+        <path d="M1130 900 L1215 710 L1350 900 Z"/>
+        <path d="M1450 900 L1510 735 L1600 900 Z"/>
+      </g>
+
+      <!-- tiny people / scale marks -->
+      <g fill="#030303">
+        <path d="M935 680 l12 -45 l12 45 z"/>
+        <rect x="944" y="680" width="8" height="44"/>
+        <path d="M970 695 l8 -34 l8 34 z"/>
+        <rect x="976" y="695" width="5" height="30"/>
+      </g>
+
+      <!-- grainy graphic slashes -->
+      <g fill="#dedede" opacity="0.5">
+        <path d="M210 665 L445 615 L430 640 L185 690 Z"/>
+        <path d="M570 690 L805 645 L785 668 L545 720 Z"/>
+        <path d="M1030 625 L1320 570 L1290 600 L1010 655 Z"/>
+      </g>
+    </svg>
+
+    <canvas id="canvas"></canvas>
+    <div class="hint">CLICK TO BREAK THE CITY</div>
+  </div>
+
+  <button class="reset" id="resetBtn">Reset</button>
+
+  <script>
+    const wrap = document.getElementById("sceneWrap");
+    const svg = document.getElementById("citySVG");
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const resetBtn = document.getElementById("resetBtn");
+
+    let pieces = [];
+    let animationId = null;
+    let started = false;
+
+    const TILE = 14;
+
+    function resizeCanvas() {
+      const rect = wrap.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * devicePixelRatio);
+      canvas.height = Math.floor(rect.height * devicePixelRatio);
+      canvas.style.width = rect.width + "px";
+      canvas.style.height = rect.height + "px";
+      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+    }
+
+    function svgToImage(callback) {
+      const svgText = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([svgText], { type: "image/svg+xml;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const img = new Image();
+
+      img.onload = () => {
+        callback(img);
+        URL.revokeObjectURL(url);
+      };
+
+      img.src = url;
+    }
+
+    function createPieces(img) {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      pieces = [];
+
+      for (let y = 0; y < h; y += TILE) {
+        for (let x = 0; x < w; x += TILE) {
+          const centerX = x - w / 2;
+          const centerY = y - h / 2;
+          const dist = Math.sqrt(centerX * centerX + centerY * centerY);
+          const delay = dist * 0.55 + Math.random() * 260;
+
+          pieces.push({
+            sx: x,
+            sy: y,
+            sw: TILE,
+            sh: TILE,
+            x,
+            y,
+            vx: (Math.random() - 0.5) * 5 + centerX / w * 4,
+            vy: -Math.random() * 5 - 1,
+            rot: 0,
+            vr: (Math.random() - 0.5) * 0.16,
+            alpha: 1,
+            delay,
+            active: false
+          });
+        }
+      }
+
+      pieces.image = img;
+    }
+
+    function startBreak() {
+      if (started) return;
+      started = true;
+      wrap.classList.add("playing");
+
+      resizeCanvas();
+
+      svgToImage((img) => {
+        createPieces(img);
+        svg.style.opacity = 0;
+        animate(0);
+      });
+    }
+
+    function animate(time) {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const img = pieces.image;
+
+      for (const p of pieces) {
+        if (time > p.delay) {
+          p.active = true;
+        }
+
+        if (p.active) {
+          p.vy += 0.24;
+          p.vx *= 0.997;
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+
+          if (p.y > h * 0.72) {
+            p.alpha -= 0.008;
+          }
+        }
+
+        if (p.alpha <= 0) continue;
+
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.translate(p.x + p.sw / 2, p.y + p.sh / 2);
+        ctx.rotate(p.rot);
+
+        ctx.drawImage(
+          img,
+          p.sx * img.width / w,
+          p.sy * img.height / h,
+          p.sw * img.width / w,
+          p.sh * img.height / h,
+          -p.sw / 2,
+          -p.sh / 2,
+          p.sw,
+          p.sh
+        );
+
+        ctx.restore();
+      }
+
+      const alive = pieces.some(p => p.alpha > 0);
+
+      if (alive) {
+        animationId = requestAnimationFrame(animate);
+      }
+    }
+
+    function resetScene() {
+      cancelAnimationFrame(animationId);
+      pieces = [];
+      started = false;
+      wrap.classList.remove("playing");
+      svg.style.opacity = 1;
+
+      const rect = wrap.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+    }
+
+    wrap.addEventListener("click", startBreak);
+    resetBtn.addEventListener("click", resetScene);
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      if (!started) resetScene();
+    });
+
+    resizeCanvas();
+  </script>
+</body>
+</html>
