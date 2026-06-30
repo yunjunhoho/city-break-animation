@@ -3,33 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>City Shatter Animation</title>
+  <title>City Break Into Strata</title>
 
   <style>
     * {
       box-sizing: border-box;
     }
 
+    html,
     body {
       margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: #111;
-      font-family: system-ui, sans-serif;
-      color: white;
+      width: 100%;
+      height: 100%;
       overflow: hidden;
+      background: #111;
+    }
+
+    body {
+      cursor: pointer;
     }
 
     .scene-wrap {
-      width: min(92vw, 1100px);
-      aspect-ratio: 16 / 9;
-      position: relative;
-      border: 10px solid #777;
-      background: #aaa;
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
       overflow: hidden;
-      cursor: pointer;
-      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+      background: #aaa;
     }
 
     svg,
@@ -43,40 +43,6 @@
 
     canvas {
       pointer-events: none;
-    }
-
-    .hint {
-      position: absolute;
-      left: 18px;
-      bottom: 16px;
-      z-index: 3;
-      padding: 8px 12px;
-      font-size: 14px;
-      letter-spacing: 0.04em;
-      background: rgba(0, 0, 0, 0.45);
-      color: #eee;
-      backdrop-filter: blur(4px);
-      transition: opacity 0.4s ease;
-    }
-
-    .scene-wrap.playing .hint {
-      opacity: 0;
-    }
-
-    .reset {
-      position: fixed;
-      right: 22px;
-      bottom: 22px;
-      border: 1px solid #777;
-      background: #222;
-      color: white;
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 14px;
-    }
-
-    .reset:hover {
-      background: #333;
     }
   </style>
 </head>
@@ -97,16 +63,20 @@
         </linearGradient>
       </defs>
 
-      <!-- sky -->
       <rect width="1600" height="900" fill="url(#sky)" />
 
-      <!-- sharp clouds -->
-      <path d="M0 135 C240 65 355 95 520 55 C720 5 850 55 980 35 C1160 7 1300 75 1600 25 L1600 0 L0 0 Z"
-            fill="#eeeeee" opacity="0.65"/>
-      <path d="M0 190 C210 130 410 170 615 115 C800 67 970 122 1175 82 C1350 48 1470 95 1600 70 L1600 0 L0 0 Z"
-            fill="#cfcfcf" opacity="0.75"/>
+      <path
+        d="M0 135 C240 65 355 95 520 55 C720 5 850 55 980 35 C1160 7 1300 75 1600 25 L1600 0 L0 0 Z"
+        fill="#eeeeee"
+        opacity="0.65"
+      />
 
-      <!-- distant city silhouettes -->
+      <path
+        d="M0 190 C210 130 410 170 615 115 C800 67 970 122 1175 82 C1350 48 1470 95 1600 70 L1600 0 L0 0 Z"
+        fill="#cfcfcf"
+        opacity="0.75"
+      />
+
       <g fill="#505050">
         <rect x="80" y="310" width="70" height="290"/>
         <rect x="170" y="260" width="95" height="340"/>
@@ -121,7 +91,6 @@
         <rect x="1410" y="340" width="75" height="260"/>
       </g>
 
-      <!-- background towers -->
       <g fill="#292929">
         <path d="M70 600 L95 220 L150 600 Z"/>
         <path d="M210 600 L230 130 L280 600 Z"/>
@@ -131,7 +100,6 @@
         <path d="M1320 600 L1375 150 L1440 600 Z"/>
       </g>
 
-      <!-- main skyscrapers -->
       <g fill="#0e0e0e">
         <path d="M110 610 L150 210 L280 180 L315 610 Z"/>
         <path d="M330 610 L365 310 L470 280 L520 610 Z"/>
@@ -141,26 +109,33 @@
         <path d="M1340 610 L1390 280 L1515 240 L1560 610 Z"/>
       </g>
 
-      <!-- tower highlights -->
       <g fill="#bdbdbd" opacity="0.36">
         <path d="M175 235 L260 220 L268 600 L205 600 Z"/>
         <path d="M615 125 L700 105 L715 600 L660 600 Z"/>
         <path d="M1135 150 L1210 135 L1220 600 L1168 600 Z"/>
       </g>
 
-      <!-- black foreground overpasses -->
-      <path d="M0 650 C230 570 440 680 660 605 C860 535 1040 620 1230 565 C1410 515 1510 590 1600 545 L1600 900 L0 900 Z"
-            fill="#181818"/>
-      <path d="M0 720 C260 650 470 760 720 680 C900 620 1115 700 1320 650 C1460 615 1540 660 1600 635 L1600 900 L0 900 Z"
-            fill="#070707"/>
+      <path
+        d="M0 650 C230 570 440 680 660 605 C860 535 1040 620 1230 565 C1410 515 1510 590 1600 545 L1600 900 L0 900 Z"
+        fill="#181818"
+      />
 
-      <!-- streets -->
-      <path d="M0 740 C360 670 760 710 1600 620 L1600 700 C850 760 390 780 0 850 Z"
-            fill="url(#streetGlow)" opacity="0.95"/>
-      <path d="M0 805 C330 760 780 780 1600 705 L1600 750 C830 830 410 855 0 890 Z"
-            fill="#2e2e2e"/>
+      <path
+        d="M0 720 C260 650 470 760 720 680 C900 620 1115 700 1320 650 C1460 615 1540 660 1600 635 L1600 900 L0 900 Z"
+        fill="#070707"
+      />
 
-      <!-- perspective light strips -->
+      <path
+        d="M0 740 C360 670 760 710 1600 620 L1600 700 C850 760 390 780 0 850 Z"
+        fill="url(#streetGlow)"
+        opacity="0.95"
+      />
+
+      <path
+        d="M0 805 C330 760 780 780 1600 705 L1600 750 C830 830 410 855 0 890 Z"
+        fill="#2e2e2e"
+      />
+
       <g stroke="#c9c9c9" stroke-width="10" opacity="0.65">
         <path d="M80 815 C420 760 900 755 1510 680"/>
         <path d="M310 865 C610 815 1050 800 1600 735"/>
@@ -171,7 +146,6 @@
         <path d="M0 765 C390 715 905 720 1600 650"/>
       </g>
 
-      <!-- foreground blocks -->
       <g fill="#101010">
         <path d="M70 900 L145 735 L260 900 Z"/>
         <path d="M340 900 L410 760 L560 900 Z"/>
@@ -179,7 +153,6 @@
         <path d="M1450 900 L1510 735 L1600 900 Z"/>
       </g>
 
-      <!-- tiny people / scale marks -->
       <g fill="#030303">
         <path d="M935 680 l12 -45 l12 45 z"/>
         <rect x="944" y="680" width="8" height="44"/>
@@ -187,7 +160,6 @@
         <rect x="976" y="695" width="5" height="30"/>
       </g>
 
-      <!-- grainy graphic slashes -->
       <g fill="#dedede" opacity="0.5">
         <path d="M210 665 L445 615 L430 640 L185 690 Z"/>
         <path d="M570 690 L805 645 L785 668 L545 720 Z"/>
@@ -196,30 +168,31 @@
     </svg>
 
     <canvas id="canvas"></canvas>
-    <div class="hint">CLICK TO BREAK THE CITY</div>
   </div>
-
-  <button class="reset" id="resetBtn">Reset</button>
 
   <script>
     const wrap = document.getElementById("sceneWrap");
     const svg = document.getElementById("citySVG");
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
-    const resetBtn = document.getElementById("resetBtn");
 
     let pieces = [];
     let animationId = null;
     let started = false;
 
-    const TILE = 14;
+    const TILE = 12;
+
+    let groundMap = [];
+    let settledPieces = [];
 
     function resizeCanvas() {
       const rect = wrap.getBoundingClientRect();
+
       canvas.width = Math.floor(rect.width * devicePixelRatio);
       canvas.height = Math.floor(rect.height * devicePixelRatio);
       canvas.style.width = rect.width + "px";
       canvas.style.height = rect.height + "px";
+
       ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
     }
 
@@ -237,34 +210,48 @@
       img.src = url;
     }
 
+    function initGroundMap(width, height) {
+      const cols = Math.ceil(width / TILE);
+      groundMap = [];
+      settledPieces = [];
+
+      for (let i = 0; i < cols; i++) {
+        groundMap[i] = height - TILE;
+      }
+    }
+
     function createPieces(img) {
       const rect = wrap.getBoundingClientRect();
       const w = rect.width;
       const h = rect.height;
 
       pieces = [];
+      initGroundMap(w, h);
 
       for (let y = 0; y < h; y += TILE) {
         for (let x = 0; x < w; x += TILE) {
           const centerX = x - w / 2;
           const centerY = y - h / 2;
           const dist = Math.sqrt(centerX * centerX + centerY * centerY);
-          const delay = dist * 0.55 + Math.random() * 260;
 
           pieces.push({
             sx: x,
             sy: y,
             sw: TILE,
             sh: TILE,
+
             x,
             y,
-            vx: (Math.random() - 0.5) * 5 + centerX / w * 4,
-            vy: -Math.random() * 5 - 1,
+
+            vx: (Math.random() - 0.5) * 2.6 + centerX / w * 2.1,
+            vy: -Math.random() * 4.5 - 1,
+
             rot: 0,
-            vr: (Math.random() - 0.5) * 0.16,
-            alpha: 1,
-            delay,
-            active: false
+            vr: (Math.random() - 0.5) * 0.12,
+
+            delay: dist * 0.45 + Math.random() * 180,
+            active: false,
+            settled: false
           });
         }
       }
@@ -272,11 +259,209 @@
       pieces.image = img;
     }
 
-    function startBreak() {
-      if (started) return;
-      started = true;
-      wrap.classList.add("playing");
+    function getColumn(x) {
+      return Math.max(
+        0,
+        Math.min(groundMap.length - 1, Math.floor(x / TILE))
+      );
+    }
 
+    function getGroundY(x) {
+      const col = getColumn(x);
+      return groundMap[col];
+    }
+
+    function settlePiece(piece) {
+      const centerX = piece.x + piece.sw / 2;
+      const col = getColumn(centerX);
+      const targetY = groundMap[col];
+
+      piece.y = targetY;
+      piece.vx = 0;
+      piece.vy = 0;
+      piece.vr = 0;
+      piece.rot = 0;
+      piece.settled = true;
+
+      groundMap[col] -= TILE;
+
+      if (groundMap[col - 1] !== undefined) {
+        groundMap[col - 1] -= TILE * 0.18;
+      }
+
+      if (groundMap[col + 1] !== undefined) {
+        groundMap[col + 1] -= TILE * 0.18;
+      }
+
+      settledPieces.push(piece);
+    }
+
+    function drawPiece(piece, img) {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.save();
+
+      ctx.translate(piece.x + piece.sw / 2, piece.y + piece.sh / 2);
+      ctx.rotate(piece.rot);
+
+      ctx.drawImage(
+        img,
+        piece.sx * img.width / w,
+        piece.sy * img.height / h,
+        piece.sw * img.width / w,
+        piece.sh * img.height / h,
+        -piece.sw / 2,
+        -piece.sh / 2,
+        piece.sw,
+        piece.sh
+      );
+
+      if (piece.settled) {
+        ctx.globalCompositeOperation = "source-atop";
+
+        const layerShade = Math.floor(piece.y / TILE) % 5;
+
+        if (layerShade === 0) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.10)";
+        } else if (layerShade === 1) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.12)";
+        } else if (layerShade === 2) {
+          ctx.fillStyle = "rgba(255, 255, 255, 0.06)";
+        } else {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.20)";
+        }
+
+        ctx.fillRect(-piece.sw / 2, -piece.sh / 2, piece.sw, piece.sh);
+      }
+
+      ctx.restore();
+    }
+
+    function drawStrataLines() {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.save();
+      ctx.globalAlpha = 0.34;
+      ctx.lineWidth = 2;
+
+      for (let y = h - TILE * 2; y > h * 0.42; y -= TILE * 2.4) {
+        ctx.beginPath();
+
+        for (let x = 0; x <= w; x += 28) {
+          const wave = Math.sin(x * 0.018 + y * 0.04) * 5;
+          const yy = y + wave;
+
+          if (x === 0) {
+            ctx.moveTo(x, yy);
+          } else {
+            ctx.lineTo(x, yy);
+          }
+        }
+
+        ctx.strokeStyle =
+          y % 48 < 24
+            ? "rgba(255,255,255,0.35)"
+            : "rgba(0,0,0,0.35)";
+
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawDust() {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+
+      ctx.save();
+      ctx.globalAlpha = 0.12;
+      ctx.fillStyle = "#d8d8d8";
+
+      for (let i = 0; i < 70; i++) {
+        const x = Math.random() * w;
+        const y = h * 0.55 + Math.random() * h * 0.3;
+        const size = Math.random() * 2.4 + 0.5;
+
+        ctx.fillRect(x, y, size, size);
+      }
+
+      ctx.restore();
+    }
+
+    function animate(time) {
+      const rect = wrap.getBoundingClientRect();
+      const w = rect.width;
+      const h = rect.height;
+      const img = pieces.image;
+
+      ctx.clearRect(0, 0, w, h);
+
+      for (const p of settledPieces) {
+        drawPiece(p, img);
+      }
+
+      drawStrataLines();
+
+      for (const p of pieces) {
+        if (p.settled) continue;
+
+        if (time > p.delay) {
+          p.active = true;
+        }
+
+        if (p.active) {
+          p.vy += 0.22;
+          p.vx *= 0.992;
+
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vr;
+
+          if (p.x < 0) {
+            p.x = 0;
+            p.vx *= -0.25;
+          }
+
+          if (p.x > w - TILE) {
+            p.x = w - TILE;
+            p.vx *= -0.25;
+          }
+
+          const groundY = getGroundY(p.x + p.sw / 2);
+
+          if (p.y >= groundY) {
+            settlePiece(p);
+            continue;
+          }
+        }
+
+        drawPiece(p, img);
+      }
+
+      drawDust();
+
+      const moving = pieces.some(p => !p.settled);
+
+      if (moving) {
+        animationId = requestAnimationFrame(animate);
+      } else {
+        drawStrataLines();
+      }
+    }
+
+    function startBreak() {
+      if (started) {
+        resetScene();
+        setTimeout(startBreak, 80);
+        return;
+      }
+
+      started = true;
       resizeCanvas();
 
       svgToImage((img) => {
@@ -286,77 +471,25 @@
       });
     }
 
-    function animate(time) {
-      const rect = wrap.getBoundingClientRect();
-      const w = rect.width;
-      const h = rect.height;
-
-      ctx.clearRect(0, 0, w, h);
-
-      const img = pieces.image;
-
-      for (const p of pieces) {
-        if (time > p.delay) {
-          p.active = true;
-        }
-
-        if (p.active) {
-          p.vy += 0.24;
-          p.vx *= 0.997;
-          p.x += p.vx;
-          p.y += p.vy;
-          p.rot += p.vr;
-
-          if (p.y > h * 0.72) {
-            p.alpha -= 0.008;
-          }
-        }
-
-        if (p.alpha <= 0) continue;
-
-        ctx.save();
-        ctx.globalAlpha = p.alpha;
-        ctx.translate(p.x + p.sw / 2, p.y + p.sh / 2);
-        ctx.rotate(p.rot);
-
-        ctx.drawImage(
-          img,
-          p.sx * img.width / w,
-          p.sy * img.height / h,
-          p.sw * img.width / w,
-          p.sh * img.height / h,
-          -p.sw / 2,
-          -p.sh / 2,
-          p.sw,
-          p.sh
-        );
-
-        ctx.restore();
-      }
-
-      const alive = pieces.some(p => p.alpha > 0);
-
-      if (alive) {
-        animationId = requestAnimationFrame(animate);
-      }
-    }
-
     function resetScene() {
       cancelAnimationFrame(animationId);
+
       pieces = [];
+      settledPieces = [];
+      groundMap = [];
       started = false;
-      wrap.classList.remove("playing");
+
       svg.style.opacity = 1;
 
       const rect = wrap.getBoundingClientRect();
       ctx.clearRect(0, 0, rect.width, rect.height);
     }
 
-    wrap.addEventListener("click", startBreak);
-    resetBtn.addEventListener("click", resetScene);
+    document.body.addEventListener("click", startBreak);
+
     window.addEventListener("resize", () => {
       resizeCanvas();
-      if (!started) resetScene();
+      resetScene();
     });
 
     resizeCanvas();
